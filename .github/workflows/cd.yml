@@ -3,40 +3,47 @@ name: Deploy Next.js with Ansible
 on:
   push:
     branches:
-      - master       # adapte si ta branche s'appelle autrement
-  workflow_dispatch: # permet de déclencher manuellement
+      - main
+  workflow_dispatch:
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
 
     env:
-      EC2_HOST: ${{ secrets.EC2_HOST }} # ou mets directement ton IP si tu préfères
+      EC2_HOST: ${{ secrets.EC2_HOST }}
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies (CI)
+        run: |
+          npm ci
+      - name: Build Next.js (CI)
+        run: |
+          npm run build
+
       - name: Set up SSH key
         run: |
           mkdir -p ~/.ssh
-          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/aws-dev-key.pem
+          printf '%s\n' "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/aws-dev-key.pem
+          sed -i 's/\r$//' ~/.ssh/aws-dev-key.pem
           chmod 600 ~/.ssh/aws-dev-key.pem
 
-          # Known hosts (évite le prompt interactif)
-          if [ -n "${EC2_HOST}" ]; then
-            ssh-keyscan -H "${EC2_HOST}" >> ~/.ssh/known_hosts
-          else
-            # fallback: essaie de lire l'IP depuis l'inventaire ou laisse ssh gérer
-            echo "EC2_HOST non défini, ssh-keyscan ignoré."
-          fi
+          # Known hosts
+          ssh-keyscan -H "${{ secrets.EC2_HOST }}" >> ~/.ssh/known_hosts
 
       - name: Install Ansible and dependencies
         run: |
           sudo apt-get update
           sudo apt-get install -y ansible python3-pip rsync
-
-          # Collections nécessaires
           ansible-galaxy collection install community.general ansible.posix
 
       - name: Run Ansible playbook (deploy Next.js)
@@ -44,4 +51,4 @@ jobs:
         env:
           ANSIBLE_ROLES_PATH: ${{ github.workspace }}/infra/ansible/roles
         run: |
-          ansible-playbook -i inventory/hosts.ini playbooks/deploy.yml
+          ansible-playbook -i inventory/hosts.ini playbooks/deploy-next.yml
