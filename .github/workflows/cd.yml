@@ -3,7 +3,7 @@ name: Deploy Next.js with Ansible
 on:
   push:
     branches:
-      - main        # adapte si ta branche s'appelle autrement
+      - master       # adapte si ta branche s'appelle autrement
   workflow_dispatch: # permet de déclencher manuellement
 
 jobs:
