@@ -1,0 +1,37 @@
+---
+- name: Installer les paquets nécessaires au build
+  ansible.builtin.apt:
+    name: "{{ extra_build_packages }}"
+    state: present
+    update_cache: yes
+  become: yes
+
+- name: Supprimer Node.js installé depuis les dépôts Ubuntu (si présent)
+  ansible.builtin.apt:
+    name:
+      - nodejs
+      - npm
+    state: absent
+  become: yes
+
+- name: Ajouter le dépôt NodeSource pour Node.js {{ node_major_version }}.x
+  ansible.builtin.shell: |
+    curl -fsSL https://deb.nodesource.com/setup_{{ node_major_version }}.x | bash -
+  args:
+    executable: /bin/bash
+  become: yes
+
+- name: Installer Node.js {{ node_major_version }} depuis NodeSource
+  ansible.builtin.apt:
+    name: nodejs
+    state: present
+  become: yes
+
+- name: Vérifier la version de Node
+  ansible.builtin.command: node -v
+  register: node_version
+  changed_when: false
+
+- name: Afficher la version de Node
+  ansible.builtin.debug:
+    msg: "Node version installée : {{ node_version.stdout }}"

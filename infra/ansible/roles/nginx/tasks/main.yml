@@ -1,0 +1,23 @@
+---
+- name: Installer nginx
+  ansible.builtin.apt:
+    name: nginx
+    state: present
+  become: yes
+
+- name: S'assurer que nginx est démarré et activé
+  ansible.builtin.service:
+    name: nginx
+    state: started
+    enabled: yes
+  become: yes
+
+- name: Déployer la configuration nginx pour Next.js
+  ansible.builtin.template:
+    src: next-proxy.conf.j2
+    dest: /etc/nginx/sites-available/default
+    owner: root
+    group: root
+    mode: "0644"
+  notify: Reload nginx
+  become: yes

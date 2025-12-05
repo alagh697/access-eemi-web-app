@@ -1,0 +1,17 @@
+---
+- name: Mettre à jour le cache APT
+  ansible.builtin.apt:
+    update_cache: yes
+    cache_valid_time: 3600
+  become: yes
+
+- name: Installer les paquets de base
+  ansible.builtin.apt:
+    name: "{{ common_packages }}"
+    state: present
+  become: yes
+
+- name: Configurer le timezone
+  ansible.builtin.command: timedatectl set-timezone {{ timezone }}
+  become: yes
+  changed_when: false

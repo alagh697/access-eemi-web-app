@@ -1,0 +1,7 @@
+---
+node_major_version: 20
+extra_build_packages:
+  - build-essential
+  - rsync
+  - gnupg
+  - curl

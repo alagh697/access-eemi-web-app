@@ -1,0 +1,29 @@
+---
+- name: Installer pm2 globalement
+  community.general.npm:
+    name: pm2
+    global: true
+    state: present
+  become: yes
+
+- name: Arrêter l'ancienne instance PM2 si elle existe
+  ansible.builtin.command: pm2 delete {{ pm2_app_name }}
+  register: pm2_delete
+  failed_when: false
+  changed_when: "'[PM2][ERROR]' not in pm2_delete.stderr"
+
+- name: Démarrer l'app Next.js avec PM2
+  ansible.builtin.command: pm2 start npm --name "{{ pm2_app_name }}" -- start
+  args:
+    chdir: "{{ app_dir }}"
+  environment:
+    NODE_ENV: production
+
+- name: Sauvegarder la config PM2
+  ansible.builtin.command: pm2 save
+
+- name: Configurer PM2 pour démarrer au boot (systemd)
+  ansible.builtin.command: pm2 startup systemd -u ansible --hp /home/ansible
+  register: pm2_startup
+  changed_when: "'systemd' in pm2_startup.stdout"
+  become: yes

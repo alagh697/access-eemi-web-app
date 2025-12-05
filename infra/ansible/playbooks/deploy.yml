@@ -1,0 +1,16 @@
+---
+- name: Déploiement complet de l'app Next.js
+  hosts: web
+  become: true
+
+  vars:
+    # playbook_dir = .../infra/ansible/playbooks
+    # dirname x3 = racine du repo (access-eemi-web-app)
+    project_src: "{{ playbook_dir | dirname | dirname | dirname }}"
+
+  roles:
+    - common
+    - nodejs
+    - next_build
+    - pm2_app
+    - nginx
