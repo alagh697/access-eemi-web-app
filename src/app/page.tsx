@@ -5,7 +5,7 @@ export default function Home() {
     <div className="min-h-screen flex flex-col items-center justify-center bg-zinc-50 dark:bg-black px-4 py-10">
 
       {/* Title */}
-      <h1 className="text-2xl md:text-3xl font-semibold mb-10 text-zinc-800 dark:text-zinc-100 text-center">
+      <h1 className="text-2xl md:text-3xl font-semibold mb-10 text-zinc-800 dark:text-red-500 text-center">
         Projet Accessibilité Numérique – EEMI
       </h1>
 

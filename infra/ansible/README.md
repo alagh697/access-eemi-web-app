@@ -107,7 +107,7 @@ Actions :
 
 ---
 
-# 🎯 Playbook principal : `deploy-next.yml`
+# 🎯 Playbook principal : `deploy.yml`
 
 Ce playbook orchestre tous les rôles :
 
