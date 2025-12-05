@@ -44,4 +44,4 @@ jobs:
         env:
           ANSIBLE_ROLES_PATH: ${{ github.workspace }}/infra/ansible/roles
         run: |
-          ansible-playbook -i inventory/hosts.ini playbooks/deploy-next.yml
+          ansible-playbook -i inventory/hosts.ini playbooks/deploy.yml
