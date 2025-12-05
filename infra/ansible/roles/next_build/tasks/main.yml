@@ -8,15 +8,17 @@
     mode: "0755"
   become: yes
 
-- name: Synchroniser le projet Next.js (code + build + node_modules) vers le serveur
+- name: Synchroniser le projet Next.js vers le serveur
   ansible.posix.synchronize:
     src: "{{ project_src }}/"
     dest: "{{ app_dir }}/"
     delete: yes
     rsync_opts:
+      - "--exclude=node_modules"
+      - "--exclude=.next"
       - "--exclude=.git"
-      - "--exclude=.github"
       - "--exclude=infra"
+      - "--exclude=.github"
       - "--exclude=.vscode"
       - "--exclude=.idea"
 
@@ -29,3 +31,15 @@
   ansible.builtin.fail:
     msg: "package.json n'a pas été trouvé dans {{ app_dir }} — le projet n'a pas été bien synchronisé."
   when: not package_json_check.stat.exists
+
+- name: Installer TOUTES les dépendances npm (y compris devDependencies)
+  community.general.npm:
+    path: "{{ app_dir }}"
+    production: false   # <-- IMPORTANT : on installe aussi les devDeps
+
+- name: Builder l'app Next.js
+  ansible.builtin.command: npm run build
+  args:
+    chdir: "{{ app_dir }}"
+  environment:
+    NODE_ENV: production
